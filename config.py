@@ -1,4 +1,3 @@
-# In config.py
 from pydantic_settings import BaseSettings
 
 
@@ -7,10 +6,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "Order Confirmation Service"
 
     # Email settings
-    MAILTRAP_API_TOKEN: str = "32be2c7f7e6a6c1cc2ecf1918c40b36c"
-    EMAIL_SENDER: str
-    COMPANY_NAME: str = "Escape Crew"
-    SUPPORT_EMAIL: str = "support@example.com"
+    MAILTRAP_API_TOKEN: str = "79e53f34f765b56b398051c45524a776"
+    EMAIL_SENDER: str = "hello@demomailtrap.co"
+    COMPANY_NAME: str = "Mailtrap Test"
+    SUPPORT_EMAIL: str = "tmaliff@outlook.com"
 
     class Config:
         env_file = ".env"

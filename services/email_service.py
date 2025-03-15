@@ -7,7 +7,7 @@ from ..config import settings
 from ..models.order import Order
 
 # Setup Jinja2 template environment
-env = Environment(loader=FileSystemLoader("app/templates"))
+env = Environment(loader=FileSystemLoader("templates"))
 
 
 def send_order_confirmation(order: Order):
