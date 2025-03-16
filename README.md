@@ -70,7 +70,7 @@ SUPPORT_EMAIL=support@yourcompany.com
 ### 5. Run the application
 
 ```bash
-uvicorn app.main:app --reload
+uvicorn escape_crew_email_service.main:app --reload
 ```
 
 The API will be available at http://localhost:8000
@@ -87,13 +87,13 @@ FastAPI automatically generates OpenAPI documentation for the API. Visit:
 ### Build the Docker image
 
 ```bash
-docker build -t order-confirmation-service .
+docker build -t escape_crew_email_service_image .
 ```
 
 ### Run the container
 
 ```bash
-docker run -p 8000:8000 --env-file .env order-confirmation-service
+docker run -p 8000:8000 --env-file .env oescape_crew_email_service
 ```
 
 ## API Usage
