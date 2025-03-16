@@ -1,6 +1,6 @@
 from fastapi import APIRouter, BackgroundTasks, HTTPException
-from ..models.order import Order
-from ..services.email_service import send_order_confirmation
+from app.models.order import Order
+from app.services.email_service import send_order_confirmation
 
 router = APIRouter()
 

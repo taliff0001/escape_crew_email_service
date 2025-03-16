@@ -1,13 +1,5 @@
-# In main.py
-from fastapi import FastAPI
-from routers import orders
-from config import settings
+# Root main.py - entry point for the application
+from app.main import app
 
-app = FastAPI(title=settings.APP_NAME)
-
-# Include routers
-app.include_router(orders.router, prefix="/api", tags=["orders"])
-
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+# This file is only used to import and expose the FastAPI app
+# All application logic is defined in the app package

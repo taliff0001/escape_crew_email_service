@@ -1,13 +1,13 @@
 import mailtrap as mt
 from jinja2 import Environment, FileSystemLoader
+import os
 
-# noinspection PyPackages
-from ..config import settings
-# noinspection PyPackages
-from ..models.order import Order
+from app.config import settings
+from app.models.order import Order
 
 # Setup Jinja2 template environment
-env = Environment(loader=FileSystemLoader("templates"))
+template_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates")
+env = Environment(loader=FileSystemLoader(template_dir))
 
 
 def send_order_confirmation(order: Order):

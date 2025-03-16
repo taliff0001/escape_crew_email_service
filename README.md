@@ -30,6 +30,35 @@ The service follows a microservice architecture pattern:
 - AWS Account (for production deployment)
 - Mailtrap Account and API Key
 
+## Project Structure
+
+The project follows a standard Python package structure:
+
+```
+/escape_crew_email_service
+├── main.py              # Entry point that imports the app
+├── app/                 # Main application package
+│   ├── __init__.py      # Package initialization
+│   ├── main.py          # FastAPI app definition
+│   ├── config.py        # Configuration settings
+│   ├── routers/         # API route definitions
+│   │   ├── __init__.py
+│   │   └── orders.py    # Order confirmation endpoints
+│   ├── services/        # Business logic
+│   │   ├── __init__.py
+│   │   └── email_service.py # Email generation and sending
+│   ├── templates/       # Email templates
+│   │   └── order_confirmation.html
+│   └── models/          # Data models
+│       ├── __init__.py
+│       └── order.py     # Order data model
+├── Dockerfile           # Docker configuration
+├── requirements.txt     # Python dependencies
+└── tests/               # Unit and integration tests
+    ├── integration/     # Integration tests
+    └── unit/            # Unit tests
+```
+
 ## Local Development Setup
 
 ### 1. Clone the repository
@@ -52,13 +81,15 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Create .env file
+### 4. Configure environment variables
+
+Copy the example environment file and update it with your values:
 
 ```bash
 cp .env.example .env
 ```
 
-Edit the `.env` file and add your Mailtrap API key and other configuration:
+Then edit the `.env` file with your actual configuration:
 
 ```
 MAILTRAP_API_TOKEN=your_mailtrap_api_token
@@ -70,7 +101,7 @@ SUPPORT_EMAIL=support@yourcompany.com
 ### 5. Run the application
 
 ```bash
-uvicorn escape_crew_email_service.main:app --reload
+uvicorn main:app --reload
 ```
 
 The API will be available at http://localhost:8000
@@ -86,15 +117,22 @@ FastAPI automatically generates OpenAPI documentation for the API. Visit:
 
 ### Build the Docker image
 
+#### For local development on Apple Silicon (M-series) or AWS ECS deployment
 ```bash
-docker build -t escape_crew_email_service_image .
+# Build using the default target platform (linux/amd64)
+docker build -t escape_crew_email_service .
+
+# Or explicitly specify the target platform
+docker build -t escape_crew_email_service --build-arg TARGETPLATFORM=linux/amd64 .
 ```
 
 ### Run the container
 
 ```bash
-docker run -p 8000:8000 --env-file .env oescape_crew_email_service
+docker run -p 8000:8000 --env-file .env escape_crew_email_service
 ```
+
+Note: Make sure your .env file is properly set up before running the container.
 
 ## API Usage
 
@@ -143,77 +181,6 @@ docker run -p 8000:8000 --env-file .env oescape_crew_email_service
 }
 ```
 
-## AWS ECS Deployment
-
-### Prerequisites
-
-- AWS CLI installed and configured
-- ECR repository created
-- ECS cluster created
-
-### Deployment Steps
-
-1. **Build and tag the Docker image**
-
-```bash
-docker build -t order-confirmation-service .
-```
-
-2. **Authenticate Docker to ECR**
-
-```bash
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin your-account-id.dkr.ecr.us-east-1.amazonaws.com
-```
-
-3. **Tag the image**
-
-```bash
-docker tag order-confirmation-service:latest your-account-id.dkr.ecr.us-east-1.amazonaws.com/order-confirmation-service:latest
-```
-
-4. **Push the image to ECR**
-
-```bash
-docker push your-account-id.dkr.ecr.us-east-1.amazonaws.com/order-confirmation-service:latest
-```
-
-5. **Create an ECS Task Definition**
-
-Use the AWS Console or AWS CLI to create a task definition that uses your ECR image. Make sure to:
-
-- Set environment variables for configuration
-- Configure appropriate CPU and memory settings
-- Set up logging to CloudWatch
-- Configure networking and security groups
-
-6. **Create or Update ECS Service**
-
-Use the AWS Console or AWS CLI to create or update an ECS service using your task definition.
-
-7. **Configure Auto Scaling (Optional)**
-
-Set up application auto-scaling for your ECS service based on CPU utilization or custom metrics.
-
-### Infrastructure as Code
-
-For production deployments, consider using:
-
-- AWS CloudFormation
-- AWS CDK
-- Terraform
-
-Example templates are available in the `infra` directory.
-
-## Email Template Customization
-
-The email templates can be found in the `app/templates` directory. They use Jinja2 templating syntax.
-
-To customize the templates:
-
-1. Edit `app/templates/order_confirmation.html` for the HTML version
-2. Update the text version in `app/services/email_service.py`
-3. Test your changes by sending a test email
-
 ## Testing
 
 ### Running Tests
@@ -236,55 +203,53 @@ The tests use Mailtrap's API to verify email delivery. To run integration tests:
 pytest tests/integration
 ```
 
-## Project Structure
+## Email Template Customization
 
+The email templates can be found in the `app/templates` directory. They use Jinja2 templating syntax.
+
+To customize the templates:
+
+1. Edit `app/templates/order_confirmation.html` for the HTML version
+2. Update the text version in `app/services/email_service.py`
+3. Test your changes by sending a test email
+
+## AWS ECS Deployment
+
+### Prerequisites
+
+- AWS CLI installed and configured
+- ECR repository created
+- ECS cluster created
+
+### Deployment Steps
+
+1. **Build and tag the Docker image**
+
+```bash
+docker build -t escape_crew_email_service .
 ```
-/app
-├── main.py              # FastAPI app entry point
-├── routers/             # API route definitions
-│   └── orders.py        # Order confirmation endpoints
-├── services/            # Business logic
-│   └── email_service.py # Email generation and sending
-├── templates/           # Email templates
-│   └── order_confirmation.html
-├── models/              # Data models
-│   └── order.py         # Order data model
-├── config.py            # Configuration settings
-├── Dockerfile           # Docker configuration
-├── requirements.txt     # Python dependencies
-└── tests/               # Unit and integration tests
-    ├── unit/            # Unit tests
-    └── integration/     # Integration tests
+
+2. **Authenticate Docker to ECR**
+
+```bash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin your-account-id.dkr.ecr.us-east-1.amazonaws.com
 ```
 
-## Security Considerations
+3. **Tag the image**
 
-- Store API keys and sensitive configuration in AWS Secrets Manager or Parameter Store
-- Use HTTPS for all API endpoints
-- Implement proper authentication for production deployments
-- Sanitize all input data
-- Use AWS IAM roles with least privilege principle
-- Regularly update dependencies to patch security vulnerabilities
+```bash
+docker tag escape_crew_email_service:latest your-account-id.dkr.ecr.us-east-1.amazonaws.com/escape_crew_email_service:latest
+```
 
-## Monitoring and Logging
+4. **Push the image to ECR**
 
-### CloudWatch Integration
+```bash
+docker push your-account-id.dkr.ecr.us-east-1.amazonaws.com/escape_crew_email_service:latest
+```
 
-The service is configured to send logs to AWS CloudWatch when deployed on ECS.
+5. **Deploy using ECS**
 
-### Metrics
-
-- API Request Count and Latency
-- Email Send Success/Failure Rate
-- Background Task Queue Size
-
-### Alerts
-
-Consider setting up CloudWatch Alarms for:
-
-- High error rates
-- Elevated API latency
-- Failed email deliveries
+Follow AWS documentation for deploying containers to ECS.
 
 ## Troubleshooting
 
@@ -295,15 +260,29 @@ Consider setting up CloudWatch Alarms for:
    - Verify the sender email is properly configured
    - Check logs for detailed error messages
 
+2. **Docker platform compatibility issues**
+   - When building on Apple Silicon (M-series) for x86 servers, our Dockerfile uses ARG TARGETPLATFORM
+   - If you encounter platform issues, explicitly set `--build-arg TARGETPLATFORM=linux/amd64`
+   - Ensure Docker has Rosetta 2 enabled for x86 emulation on Apple Silicon
+   - If you see "exec format error" when running containers, verify you built with the correct platform
+
+
 2. **API returning 500 errors**
    - Check application logs for exceptions
    - Verify environment variables are properly set
-   - Check database connectivity (if applicable)
+   - Check correct import paths in the code
 
 3. **Container fails to start**
    - Check for proper environment configuration
-   - Verify CPU/memory allocation is sufficient
+   - Verify Python path is correctly set in Dockerfile
    - Check Docker logs for startup errors
+
+## Security Considerations
+
+- Store API keys and sensitive configuration in environment variables or AWS Secrets Manager
+- Use HTTPS for all API endpoints 
+- Sanitize all input data
+- Regularly update dependencies to patch security vulnerabilities
 
 ## Contributing
 
@@ -316,13 +295,6 @@ Consider setting up CloudWatch Alarms for:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgements
-
-- FastAPI for the excellent web framework
-- Mailtrap for email testing capabilities
-- Jinja2 for templating
-- AWS for cloud infrastructure services
 
 ---
 
