@@ -1,5 +1,7 @@
-ARG TARGETPLATFORM=linux/amd64
-FROM --platform=${TARGETPLATFORM} python:3.13-alpine
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+
+FROM python:3.12-alpine
 
 # Set working directory
 WORKDIR /app
@@ -8,6 +10,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install dependencies
+RUN python -m pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt \
     && rm -rf /root/.cache/pip
 
@@ -20,7 +23,7 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app
 
 # Create and switch to non-root user for security
-RUN useradd -m appuser && \
+RUN adduser -D -g '' appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
